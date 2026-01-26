@@ -1,0 +1,21 @@
+# ========================================
+# PROJECT3 - 전체 프로젝트 공통 .gitignore
+# ========================================
+
+# === IDE ===
+.vscode/settings.json
+.idea/
+
+# === Python ===
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# === Secrets & Cache ===
+.env
+.kis_token_cache.json
+
+# === 개인 환경 스크립트 ===
+start_kis_trading_mcp.bat
