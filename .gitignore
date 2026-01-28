@@ -1,21 +1,17 @@
-# ========================================
-# PROJECT3 - 전체 프로젝트 공통 .gitignore
-# ========================================
+# 루트 레벨 gitignore (전체 프로젝트 공통)
 
-# === IDE ===
+# IDE
 .vscode/settings.json
 .idea/
 
-# === Python ===
+# Python
 __pycache__/
 *.pyc
-*.pyo
 .venv/
 venv/
 
-# === Secrets & Cache ===
-.env
-.kis_token_cache.json
+# 외부 레포 (로컬에서만)
+open-trading-api/
 
-# === 개인 환경 스크립트 ===
+# Docker 스크립트 (개인 환경)
 start_kis_trading_mcp.bat
