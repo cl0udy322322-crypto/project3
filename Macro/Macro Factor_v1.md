@@ -335,3 +335,4 @@ if USD_KRW > MA252(USD_KRW):  # 1년 이평선 상회
 2. **시간 지연**: 월별 지표 (CD Rate, Production)인 이유로 1-2개월 lag 발생
 3. **Regime 미분류**: Bull Rally(진짜반등) vs Bear Rally(데드캣/가짜반등) 구분 불가
 
+
