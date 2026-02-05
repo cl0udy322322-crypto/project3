@@ -25,9 +25,9 @@ class KISConfig:
         def getenv(name: str, default: str | None = None) -> str | None:
             return os.getenv(f"{prefix}{name}", default)
 
-        base_url = getenv("BASE_URL")
-        app_key = getenv("APP_KEY")
-        app_secret = getenv("APP_SECRET")
+        base_url = (getenv("BASE_URL") or "").strip() or None
+        app_key = (getenv("APP_KEY") or "").strip() or None
+        app_secret = (getenv("APP_SECRET") or "").strip() or None
 
         if not base_url:
             raise ValueError(f"Missing env: {prefix}BASE_URL")
@@ -36,10 +36,10 @@ class KISConfig:
         if not app_secret:
             raise ValueError(f"Missing env: {prefix}APP_SECRET")
 
-        cano = getenv("CANO") or None
-        acnt_prdt_cd = getenv("ACNT_PRDT_CD") or None
+        cano = (getenv("CANO") or "").strip() or None
+        acnt_prdt_cd = (getenv("ACNT_PRDT_CD") or "").strip() or None
         custtype = (getenv("CUSTTYPE", "P") or "P").strip() or "P"
-        token_cache_path = getenv("TOKEN_CACHE", ".kis_token_cache.json")
+        token_cache_path = (getenv("TOKEN_CACHE", ".kis_token_cache.json") or "").strip()
 
         return KISConfig(
             base_url=base_url.rstrip("/"),

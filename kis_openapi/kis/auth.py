@@ -86,17 +86,65 @@ def request_token(base_url: str, app_key: str, app_secret: str, timeout: float =
         "appsecret": app_secret,
     }
 
+    def _post_json() -> requests.Response:
+        # KIS official samples often send a JSON string in the request body (data=) and
+        # set Accept to text/plain. Some gateways behave differently depending on these.
+        payload = json.dumps(body, ensure_ascii=False)
+        return requests.post(
+            url,
+            data=payload,
+            headers={
+                "Content-Type": "application/json",
+                "Accept": "text/plain",
+                "charset": "UTF-8",
+            },
+            timeout=timeout,
+        )
+
+    def _post_form() -> requests.Response:
+        # KIS docs typically show JSON; however, certain gateways accept/require form encoding.
+        return requests.post(
+            url,
+            data=body,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            timeout=timeout,
+        )
+
     try:
-        resp = requests.post(url, json=body, timeout=timeout)
+        resp = _post_json()
     except requests.RequestException as e:
         raise KISRequestError(f"Token request failed: {e}") from e
 
+    # If we got a non-2xx, try to surface response body to help debugging.
     if resp.status_code // 100 != 2:
-        raise KISAuthError(f"Token request failed: {resp.status_code} {resp.text}")
+        raise KISAuthError(
+            f"Token request failed: {resp.status_code} "
+            f"content_type={resp.headers.get('Content-Type')} body={resp.text}"
+        )
+
+    # Some users observe HTTP 200 with empty body. In that case, retry as form-encoded.
+    if not resp.content:
+        try:
+            resp2 = _post_form()
+            if resp2.status_code // 100 == 2 and resp2.content:
+                resp = resp2
+            elif resp2.status_code // 100 != 2:
+                raise KISAuthError(
+                    f"Token request confirm failed: {resp2.status_code} "
+                    f"content_type={resp2.headers.get('Content-Type')} body={resp2.text}"
+                )
+        except requests.RequestException as e:
+            raise KISRequestError(f"Token request retry failed: {e}") from e
 
     try:
         data = resp.json()
     except ValueError as e:
-        raise KISAuthError(f"Token response not JSON: {resp.text}") from e
+        # Provide richer context without leaking credentials.
+        ct = resp.headers.get("Content-Type")
+        body_preview = (resp.text or "")[:1000]
+        raise KISAuthError(
+            f"Token response not JSON: status={resp.status_code} content_type={ct} "
+            f"len={len(resp.content)} body_preview={body_preview!r}"
+        ) from e
 
     return _parse_token_response(data)
