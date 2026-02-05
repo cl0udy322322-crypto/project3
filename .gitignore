@@ -15,3 +15,4 @@ open-trading-api/
 
 # Docker 스크립트 (개인 환경)
 start_kis_trading_mcp.bat
+Macro/nul
